@@ -20,7 +20,9 @@ weatherBtn.onclick = async () => {
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=${lang}`
       )
     );
-  } catch (error) {}
+  } catch (error) {
+    weatherInfo.innerHTML = `<p>Не удалось получить погоду</p>`;
+  }
 };
 
 geoWeatherBtn.onclick = async () => {
@@ -53,7 +55,9 @@ async function fetchWeather(url) {
     const data = await res.json();
     localStorage.setItem("weather", JSON.stringify(data));
     return data;
-  } catch (error) {}
+  } catch (error) {
+    weatherInfo.innerHTML = `<p>Не удалось получить геолокацию</p>`;
+  }
 }
 
 function displayWeather({
