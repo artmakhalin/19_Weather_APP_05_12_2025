@@ -3,16 +3,21 @@ const cityValueInput = document.getElementById("cityValueInput");
 const weatherBtn = document.getElementById("weatherBtn");
 const weatherInfo = document.getElementById("weatherInfo");
 const geoWeatherBtn = document.getElementById("geoWeatherBtn");
+const history = document.getElementById("history");
 
 document.addEventListener("DOMContentLoaded", () => {
   if (localStorage.getItem("weather")) {
     const data = JSON.parse(localStorage.getItem("weather"));
     displayWeather(data);
   }
+  if (!localStorage.getItem("searchHistory")) {
+    localStorage.setItem("searchHistory", JSON.stringify([]));
+  }
 });
 
-weatherBtn.onclick = async () => {
-  const city = cityValueInput.value.trim();
+weatherBtn.onclick = async () => await getWeather(cityValueInput.value.trim());
+
+async function getWeather(city) {
   const lang = document.getElementById("langSelect").value;
   try {
     displayWeather(
@@ -23,7 +28,7 @@ weatherBtn.onclick = async () => {
   } catch (error) {
     weatherInfo.innerHTML = `<p>Не удалось получить погоду</p>`;
   }
-};
+}
 
 geoWeatherBtn.onclick = async () => {
   try {
@@ -54,6 +59,7 @@ async function fetchWeather(url) {
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     localStorage.setItem("weather", JSON.stringify(data));
+    pushToHistory("searchHistory", data.name);
     return data;
   } catch (error) {
     weatherInfo.innerHTML = `<p>Не удалось получить геолокацию</p>`;
@@ -67,7 +73,7 @@ function displayWeather({
   wind: { speed },
 }) {
   cityValueInput.value = "";
-
+  displayHistory();
   weatherInfo.innerHTML = `
     <p style="text-transform: uppercase;">${name}</p>
     <img class="weather-icon" src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="iconWeatherDescription">
@@ -96,3 +102,35 @@ switcher.onchange = () => {
     link.href = "./style2.css";
   }
 };
+
+function pushToHistory(key, value, limit = 3) {
+  const arr = getHistory(key);
+
+  if (!arr.includes(value)) {
+    arr.push(value);
+  }
+
+  if (arr.length > limit) {
+    arr.shift();
+  }
+
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+
+function getHistory(key) {
+  const raw = localStorage.getItem(key);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function displayHistory() {
+  history.innerHTML = "";
+  const searchHistory = getHistory("searchHistory");
+  console.log(searchHistory.length);  
+  for (const city of searchHistory) {
+    const btnHistory = document.createElement("button");
+    btnHistory.textContent = city;
+    btnHistory.style.margin = "5px";
+    btnHistory.onclick = async () => await getWeather(city);
+    history.appendChild(btnHistory);
+  }
+}
