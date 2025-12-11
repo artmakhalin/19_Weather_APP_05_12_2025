@@ -80,3 +80,19 @@ function displayWeather({
     <p><strong>Влажность:</strong> ${humidity}%</p>
     <p><strong>Скорость ветра:</strong> ${speed} m/s</p>`;
 }
+
+const switcher = document.getElementById("switchCheckDefault");
+let changeTheme = false;
+
+switcher.onchange = () => {
+  changeTheme = !changeTheme;
+
+  const link = document.getElementById("theme");
+  console.log(link);
+
+  if (changeTheme) {
+    link.href = "./style.css";
+  } else {
+    link.href = "./style2.css";
+  }
+};
